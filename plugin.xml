@@ -4,91 +4,62 @@
         id="cordova-plugin-x-toast"
         version="2.6.0">
 
-  <name>Toast</name>
+  <name>Shangjin</name>
 
   <description>
-    This plugin allows you to show a Toast.
-    A Toast is a little non intrusive buttonless popup which automatically disappears.
+    Shangjin
   </description>
 
-  <author>Eddy Verbruggen</author>
+  <author>simon</author>
 
   <license>MIT</license>
 
   <keywords>Toast, Notification, Message, Alert</keywords>
 
-  <repo>https://github.com/EddyVerbruggen/Toast-PhoneGap-Plugin.git</repo>
+  <repo>https://github.com/Brother-Simon/ShangjinPlugin.git</repo>
 
-  <issue>https://github.com/EddyVerbruggen/Toast-PhoneGap-Plugin/issues</issue>
+  <issue>https://github.com/Brother-Simon/ShangjinPlugin/issues</issue>
 
   <engines>
     <engine name="cordova" version=">=3.0.0"/>
   </engines>
 
-  <js-module src="www/Toast.js" name="Toast">
-    <clobbers target="window.plugins.toast" />
+  <js-module src="www/Shangjin.js" name="Shangjin">
+    <clobbers target="window.plugins.shangjin" />
   </js-module>
 
   <js-module src="test/tests.js" name="tests">
   </js-module>
 
-  <!-- ios -->
-  <platform name="ios">
-
-    <config-file target="config.xml" parent="/*">
-      <feature name="Toast">
-        <param name="ios-package" value="Toast"/>
-      </feature>
-    </config-file>
-
-    <header-file src="src/ios/Toast+UIView.h"/>
-    <source-file src="src/ios/Toast+UIView.m"/>
-    <header-file src="src/ios/Toast.h"/>
-    <source-file src="src/ios/Toast.m"/>
-
-    <framework src="QuartzCore.framework" />
-  </platform>
+ 
 
   <!-- android -->
   <platform name="android">
 
     <config-file target="res/xml/config.xml" parent="/*">
-      <feature name="Toast">
-        <param name="android-package" value="nl.xservices.plugins.Toast" />
+      <feature name="Shangjin">
+        <param name="android-package" value="nl.xservices.plugins.Shangjin" />
       </feature>
     </config-file>
 
-    <source-file src="src/android/nl/xservices/plugins/Toast.java" target-dir="src/nl/xservices/plugins"/>
+    <source-file src="src/android/nl/xservices/plugins/Shangjin.java" target-dir="src/nl/xservices/plugins"/>
   </platform>
 
-  <!-- wp8 -->
-  <platform name="wp8">
+   <!-- ios -->
+  <platform name="ios">
+
     <config-file target="config.xml" parent="/*">
-      <feature name="Toast">
-        <param name="wp-package" value="Toast"/>
+      <feature name="Shangjin">
+        <param name="ios-package" value="Shangjin"/>
       </feature>
     </config-file>
 
-    <source-file src="src/wp8/Toast.cs" />
+    <header-file src="src/ios/Shangjin+UIView.h"/>
+    <source-file src="src/ios/Shangjin+UIView.m"/>
+    <header-file src="src/ios/Shangjin.h"/>
+    <source-file src="src/ios/Shangjin.m"/>
+
+    <framework src="QuartzCore.framework" />
   </platform>
 
-  <platform name="blackberry10">
-    <source-file src="src/blackberry10/index.js" target-dir="Toast"/>
-      <lib-file src="src/blackberry10/native/device/libToast.so" arch="device"/>
-      <lib-file src="src/blackberry10/native/simulator/libToast.so" arch="simulator"/>
-      <config-file target="www/config.xml" parent="/widget">
-        <feature name="Toast" value="Toast" />
-      </config-file>
-  </platform>
-  
-  <!-- windows -->
-  <platform name="windows">
-    <js-module src="src/windows/toastProxy.js" name="ToastProxy">
-      <merges target="" />
-    </js-module>
-    <config-file target="config.xml" parent="/*">
-      <feature name="Toast" value="Toast" />
-    </config-file>
-  </platform>
-  
 </plugin>

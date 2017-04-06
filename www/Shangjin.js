@@ -1,7 +1,7 @@
-function Toast() {
+function Shangjin() {
 }
 
-Toast.prototype.optionsBuilder = function () {
+Shangjin.prototype.optionsBuilder = function () {
 
   // defaults
   var message = null;
@@ -42,13 +42,13 @@ Toast.prototype.optionsBuilder = function () {
 };
 
 
-Toast.prototype.showWithOptions = function (options, successCallback, errorCallback) {
+Shangjin.prototype.showWithOptions = function (options, successCallback, errorCallback) {
   options.duration = (options.duration === undefined ? 'long' : options.duration.toString());
   options.message = options.message.toString();
-  cordova.exec(successCallback, errorCallback, "Toast", "show", [options]);
+  cordova.exec(successCallback, errorCallback, "Shangjin", "show", [options]);
 };
 
-Toast.prototype.show = function (message, duration, position, successCallback, errorCallback) {
+Shangjin.prototype.show = function (message, duration, position, successCallback, errorCallback) {
   this.showWithOptions(
       this.optionsBuilder()
           .withMessage(message)
@@ -59,41 +59,41 @@ Toast.prototype.show = function (message, duration, position, successCallback, e
       errorCallback);
 };
 
-Toast.prototype.showShortTop = function (message, successCallback, errorCallback) {
+Shangjin.prototype.showShortTop = function (message, successCallback, errorCallback) {
   this.show(message, "short", "top", successCallback, errorCallback);
 };
 
-Toast.prototype.showShortCenter = function (message, successCallback, errorCallback) {
+Shangjin.prototype.showShortCenter = function (message, successCallback, errorCallback) {
   this.show(message, "short", "center", successCallback, errorCallback);
 };
 
-Toast.prototype.showShortBottom = function (message, successCallback, errorCallback) {
+Shangjin.prototype.showShortBottom = function (message, successCallback, errorCallback) {
   this.show(message, "short", "bottom", successCallback, errorCallback);
 };
 
-Toast.prototype.showLongTop = function (message, successCallback, errorCallback) {
+Shangjin.prototype.showLongTop = function (message, successCallback, errorCallback) {
   this.show(message, "long", "top", successCallback, errorCallback);
 };
 
-Toast.prototype.showLongCenter = function (message, successCallback, errorCallback) {
+Shangjin.prototype.showLongCenter = function (message, successCallback, errorCallback) {
   this.show(message, "long", "center", successCallback, errorCallback);
 };
 
-Toast.prototype.showLongBottom = function (message, successCallback, errorCallback) {
+Shangjin.prototype.showLongBottom = function (message, successCallback, errorCallback) {
   this.show(message, "long", "bottom", successCallback, errorCallback);
 };
 
-Toast.prototype.hide = function (successCallback, errorCallback) {
-  cordova.exec(successCallback, errorCallback, "Toast", "hide", []);
+Shangjin.prototype.hide = function (successCallback, errorCallback) {
+  cordova.exec(successCallback, errorCallback, "Shangjin", "hide", []);
 };
 
-Toast.install = function () {
+Shangjin.install = function () {
   if (!window.plugins) {
     window.plugins = {};
   }
 
-  window.plugins.toast = new Toast();
-  return window.plugins.toast;
+  window.plugins.shangjin = new Shangjin();
+  return window.plugins.shangjin;
 };
 
-cordova.addConstructor(Toast.install);
+cordova.addConstructor(Shangjin.install);

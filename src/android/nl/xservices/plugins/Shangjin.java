@@ -21,7 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Toast extends CordovaPlugin {
+public class Shangjin extends CordovaPlugin {
 
   private static final String ACTION_SHOW_EVENT = "show";
   private static final String ACTION_HIDE_EVENT = "hide";
@@ -32,7 +32,7 @@ public class Toast extends CordovaPlugin {
 
   private static final int BASE_TOP_BOTTOM_OFFSET = 20;
 
-  private android.widget.Toast mostRecentToast;
+  private android.widget.Shangjin mostRecentShangjin;
   private ViewGroup viewGroup;
 
   private static final boolean IS_AT_LEAST_LOLLIPOP = Build.VERSION.SDK_INT >= 21;
@@ -86,18 +86,18 @@ public class Toast extends CordovaPlugin {
             // assuming a number of ms
             hideAfterMs = Integer.parseInt(duration);
           }
-          final android.widget.Toast toast = android.widget.Toast.makeText(
+          final android.widget.Shangjin Shangjin = android.widget.Shangjin.makeText(
               IS_AT_LEAST_LOLLIPOP ? cordova.getActivity().getWindow().getContext() : cordova.getActivity().getApplicationContext(),
               message,
-              android.widget.Toast.LENGTH_LONG // actually controlled by a timer further down
+              android.widget.Shangjin.LENGTH_LONG // actually controlled by a timer further down
           );
 
           if ("top".equals(position)) {
-            toast.setGravity(GRAVITY_TOP, 0, BASE_TOP_BOTTOM_OFFSET + addPixelsY);
+            Shangjin.setGravity(GRAVITY_TOP, 0, BASE_TOP_BOTTOM_OFFSET + addPixelsY);
           } else  if ("bottom".equals(position)) {
-            toast.setGravity(GRAVITY_BOTTOM, 0, BASE_TOP_BOTTOM_OFFSET - addPixelsY);
+            Shangjin.setGravity(GRAVITY_BOTTOM, 0, BASE_TOP_BOTTOM_OFFSET - addPixelsY);
           } else if ("center".equals(position)) {
-            toast.setGravity(GRAVITY_CENTER, 0, addPixelsY);
+            Shangjin.setGravity(GRAVITY_CENTER, 0, addPixelsY);
           } else {
             callbackContext.error("invalid position. valid options are 'top', 'center' and 'bottom'");
             return;
@@ -106,7 +106,7 @@ public class Toast extends CordovaPlugin {
           // if one of the custom layout options have been passed in, draw our own shape
           if (styling != null && Build.VERSION.SDK_INT >= 16) {
 
-            // the defaults mimic the default toast as close as possible
+            // the defaults mimic the default Shangjin as close as possible
             final String backgroundColor = styling.optString("backgroundColor", "#333333");
             final String textColor = styling.optString("textColor", "#ffffff");
             final Double textSize = styling.optDouble("textSize", -1);
@@ -119,25 +119,25 @@ public class Toast extends CordovaPlugin {
             shape.setCornerRadius(cornerRadius);
             shape.setAlpha((int)(opacity * 255)); // 0-255, where 0 is an invisible background
             shape.setColor(Color.parseColor(backgroundColor));
-            toast.getView().setBackground(shape);
+            Shangjin.getView().setBackground(shape);
 
-            final TextView toastTextView;
-            toastTextView = (TextView) toast.getView().findViewById(android.R.id.message);
-            toastTextView.setTextColor(Color.parseColor(textColor));
+            final TextView ShangjinTextView;
+            ShangjinTextView = (TextView) Shangjin.getView().findViewById(android.R.id.message);
+            ShangjinTextView.setTextColor(Color.parseColor(textColor));
             if (textSize > -1) {
-              toastTextView.setTextSize(textSize.floatValue());
+              ShangjinTextView.setTextSize(textSize.floatValue());
             }
 
-            toast.getView().setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
+            Shangjin.getView().setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
 
-            // this gives the toast a very subtle shadow on newer devices
+            // this gives the Shangjin a very subtle shadow on newer devices
             if (Build.VERSION.SDK_INT >= 21) {
-              toast.getView().setElevation(6);
+              Shangjin.getView().setElevation(6);
             }
           }
 
-          // On Android >= 5 you can no longer rely on the 'toast.getView().setOnTouchListener',
-          // so created something funky that compares the Toast position to the tap coordinates.
+          // On Android >= 5 you can no longer rely on the 'Shangjin.getView().setOnTouchListener',
+          // so created something funky that compares the Shangjin position to the tap coordinates.
           if (IS_AT_LEAST_LOLLIPOP) {
             getViewGroup().setOnTouchListener(new View.OnTouchListener() {
               @Override
@@ -145,21 +145,21 @@ public class Toast extends CordovaPlugin {
                 if (motionEvent.getAction() != MotionEvent.ACTION_DOWN) {
                   return false;
                 }
-                if (mostRecentToast == null || !mostRecentToast.getView().isShown()) {
+                if (mostRecentShangjin == null || !mostRecentShangjin.getView().isShown()) {
                   getViewGroup().setOnTouchListener(null);
                   return false;
                 }
 
-                float w = mostRecentToast.getView().getWidth();
+                float w = mostRecentShangjin.getView().getWidth();
                 float startX = (view.getWidth() / 2) - (w / 2);
                 float endX = (view.getWidth() / 2) + (w / 2);
 
                 float startY;
                 float endY;
 
-                float g = mostRecentToast.getGravity();
-                float y = mostRecentToast.getYOffset();
-                float h = mostRecentToast.getView().getHeight();
+                float g = mostRecentShangjin.getGravity();
+                float y = mostRecentShangjin.getYOffset();
+                float h = mostRecentShangjin.getView().getHeight();
 
                 if (g == GRAVITY_BOTTOM) {
                   startY = view.getHeight() - y - h;
@@ -183,7 +183,7 @@ public class Toast extends CordovaPlugin {
               }
             });
           } else {
-            toast.getView().setOnTouchListener(new View.OnTouchListener() {
+            Shangjin.getView().setOnTouchListener(new View.OnTouchListener() {
               @Override
               public boolean onTouch(View view, MotionEvent motionEvent) {
                 return motionEvent.getAction() == MotionEvent.ACTION_DOWN && returnTapEvent("touch", msg, data, callbackContext);
@@ -192,15 +192,15 @@ public class Toast extends CordovaPlugin {
           }
           // trigger show every 2500 ms for as long as the requested duration
           _timer = new CountDownTimer(hideAfterMs, 2500) {
-            public void onTick(long millisUntilFinished) {toast.show();}
+            public void onTick(long millisUntilFinished) {Shangjin.show();}
             public void onFinish() {
               returnTapEvent("hide", msg, data, callbackContext);
-              toast.cancel();
+              Shangjin.cancel();
             }
           }.start();
 
-          mostRecentToast = toast;
-          toast.show();
+          mostRecentShangjin = Shangjin;
+          Shangjin.show();
 
           PluginResult pr = new PluginResult(PluginResult.Status.OK);
           pr.setKeepCallback(true);
@@ -210,15 +210,15 @@ public class Toast extends CordovaPlugin {
 
       return true;
     } else {
-      callbackContext.error("toast." + action + " is not a supported function. Did you mean '" + ACTION_SHOW_EVENT + "'?");
+      callbackContext.error("Shangjin." + action + " is not a supported function. Did you mean '" + ACTION_SHOW_EVENT + "'?");
       return false;
     }
   }
 
 
   private void hide() {
-    if (mostRecentToast != null) {
-      mostRecentToast.cancel();
+    if (mostRecentShangjin != null) {
+      mostRecentShangjin.cancel();
       getViewGroup().setOnTouchListener(null);
     }
     if (_timer != null) {
