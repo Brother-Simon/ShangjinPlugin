@@ -103,6 +103,7 @@ public class Shangjin extends CordovaPlugin {
   }
 
   public boolean share(String share_text){
+    paths = new ArrayList<String>();
     Context context= IS_AT_LEAST_LOLLIPOP ? cordova.getActivity().getWindow().getContext() : cordova.getActivity().getApplicationContext();
 
     if(!isInstallWeChart(context)){
