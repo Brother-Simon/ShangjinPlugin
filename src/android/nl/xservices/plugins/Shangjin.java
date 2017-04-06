@@ -34,7 +34,7 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Toast extends CordovaPlugin {
+public class Shangjin extends CordovaPlugin {
 
   private static final String ACTION_SHOW_EVENT = "show";
   private static final String ACTION_HIDE_EVENT = "hide";
