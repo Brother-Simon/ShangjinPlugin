@@ -130,6 +130,8 @@ public class Shangjin extends CordovaPlugin {
   @Override
   public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
     if (ACTION_SHARE_EVENT.equals(action)) {
+      final JSONObject options = args.getJSONObject(0);
+      final String share_text = options.getString("share_text");      
       share(share_text);
       callbackContext.success();
       return true;
