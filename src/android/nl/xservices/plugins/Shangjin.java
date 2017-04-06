@@ -1,9 +1,15 @@
 package nl.xservices.plugins;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -13,6 +19,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.app.AlertDialog; 
+import android.app.Dialog; 
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -21,10 +29,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Shangjin extends CordovaPlugin {
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Toast extends CordovaPlugin {
 
   private static final String ACTION_SHOW_EVENT = "show";
   private static final String ACTION_HIDE_EVENT = "hide";
+  private static final String ACTION_SHARE_EVENT = "share";
 
   private static final int GRAVITY_TOP = Gravity.TOP|Gravity.CENTER_HORIZONTAL;
   private static final int GRAVITY_CENTER = Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL;
@@ -32,7 +46,7 @@ public class Shangjin extends CordovaPlugin {
 
   private static final int BASE_TOP_BOTTOM_OFFSET = 20;
 
-  private android.widget.Toast mostRecentShangjin;
+  private android.widget.Toast mostRecentToast;
   private ViewGroup viewGroup;
 
   private static final boolean IS_AT_LEAST_LOLLIPOP = Build.VERSION.SDK_INT >= 21;
@@ -44,199 +58,96 @@ public class Shangjin extends CordovaPlugin {
   private JSONObject currentData;
   private static CountDownTimer _timer;
 
-  @Override
-  public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    if (ACTION_HIDE_EVENT.equals(action)) {
-      returnTapEvent("hide", currentMessage, currentData, callbackContext);
-      hide();
-      callbackContext.success();
-      return true;
+  private File[] files;
+  private List<String> paths = new ArrayList<String>();
 
-    } else if (ACTION_SHOW_EVENT.equals(action)) {
-      if (this.isPaused) {
-        return true;
-      }
-
-      final JSONObject options = args.getJSONObject(0);
-      final String msg = options.getString("message");
-      final Spannable message = new SpannableString(msg);
-      message.setSpan(
-          new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER),
-          0,
-          msg.length() - 1,
-          Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-
-      final String duration = options.getString("duration");
-      final String position = options.getString("position");
-      final int addPixelsY = options.has("addPixelsY") ? options.getInt("addPixelsY") : 0;
-      final JSONObject data = options.has("data") ? options.getJSONObject("data") : null;
-      final JSONObject styling = options.optJSONObject("styling");
-
-      currentMessage = msg;
-      currentData = data;
-
-      cordova.getActivity().runOnUiThread(new Runnable() {
-        public void run() {
-          int hideAfterMs;
-          if ("short".equalsIgnoreCase(duration)) {
-            hideAfterMs = 2000;
-          } else if ("long".equalsIgnoreCase(duration)) {
-            hideAfterMs = 4000;
-          } else {
-            // assuming a number of ms
-            hideAfterMs = Integer.parseInt(duration);
-          }
-          final android.widget.Toast Shangjin = android.widget.Toast.makeText(
-              IS_AT_LEAST_LOLLIPOP ? cordova.getActivity().getWindow().getContext() : cordova.getActivity().getApplicationContext(),
-              message,
-              android.widget.Toast.LENGTH_LONG // actually controlled by a timer further down
-          );
-
-          if ("top".equals(position)) {
-            Shangjin.setGravity(GRAVITY_TOP, 0, BASE_TOP_BOTTOM_OFFSET + addPixelsY);
-          } else  if ("bottom".equals(position)) {
-            Shangjin.setGravity(GRAVITY_BOTTOM, 0, BASE_TOP_BOTTOM_OFFSET - addPixelsY);
-          } else if ("center".equals(position)) {
-            Shangjin.setGravity(GRAVITY_CENTER, 0, addPixelsY);
-          } else {
-            callbackContext.error("invalid position. valid options are 'top', 'center' and 'bottom'");
-            return;
-          }
-
-          // if one of the custom layout options have been passed in, draw our own shape
-          if (styling != null && Build.VERSION.SDK_INT >= 16) {
-
-            // the defaults mimic the default Shangjin as close as possible
-            final String backgroundColor = styling.optString("backgroundColor", "#333333");
-            final String textColor = styling.optString("textColor", "#ffffff");
-            final Double textSize = styling.optDouble("textSize", -1);
-            final double opacity = styling.optDouble("opacity", 0.8);
-            final int cornerRadius = styling.optInt("cornerRadius", 100);
-            final int horizontalPadding = styling.optInt("horizontalPadding", 50);
-            final int verticalPadding = styling.optInt("verticalPadding", 30);
-
-            GradientDrawable shape = new GradientDrawable();
-            shape.setCornerRadius(cornerRadius);
-            shape.setAlpha((int)(opacity * 255)); // 0-255, where 0 is an invisible background
-            shape.setColor(Color.parseColor(backgroundColor));
-            Shangjin.getView().setBackground(shape);
-
-            final TextView ShangjinTextView;
-            ShangjinTextView = (TextView) Shangjin.getView().findViewById(android.R.id.message);
-            ShangjinTextView.setTextColor(Color.parseColor(textColor));
-            if (textSize > -1) {
-              ShangjinTextView.setTextSize(textSize.floatValue());
-            }
-
-            Shangjin.getView().setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
-
-            // this gives the Shangjin a very subtle shadow on newer devices
-            if (Build.VERSION.SDK_INT >= 21) {
-              Shangjin.getView().setElevation(6);
-            }
-          }
-
-          // On Android >= 5 you can no longer rely on the 'Shangjin.getView().setOnTouchListener',
-          // so created something funky that compares the Shangjin position to the tap coordinates.
-          if (IS_AT_LEAST_LOLLIPOP) {
-            getViewGroup().setOnTouchListener(new View.OnTouchListener() {
-              @Override
-              public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() != MotionEvent.ACTION_DOWN) {
-                  return false;
-                }
-                if (mostRecentShangjin == null || !mostRecentShangjin.getView().isShown()) {
-                  getViewGroup().setOnTouchListener(null);
-                  return false;
-                }
-
-                float w = mostRecentShangjin.getView().getWidth();
-                float startX = (view.getWidth() / 2) - (w / 2);
-                float endX = (view.getWidth() / 2) + (w / 2);
-
-                float startY;
-                float endY;
-
-                float g = mostRecentShangjin.getGravity();
-                float y = mostRecentShangjin.getYOffset();
-                float h = mostRecentShangjin.getView().getHeight();
-
-                if (g == GRAVITY_BOTTOM) {
-                  startY = view.getHeight() - y - h;
-                  endY = view.getHeight() - y;
-                } else if (g == GRAVITY_CENTER) {
-                  startY = (view.getHeight() / 2) + y - (h / 2);
-                  endY = (view.getHeight() / 2) + y + (h / 2);
-                } else {
-                  // top
-                  startY = y;
-                  endY = y + h;
-                }
-
-                float tapX = motionEvent.getX();
-                float tapY = motionEvent.getY();
-
-                final boolean tapped = tapX >= startX && tapX <= endX &&
-                    tapY >= startY && tapY <= endY;
-
-                return tapped && returnTapEvent("touch", msg, data, callbackContext);
-              }
-            });
-          } else {
-            Shangjin.getView().setOnTouchListener(new View.OnTouchListener() {
-              @Override
-              public boolean onTouch(View view, MotionEvent motionEvent) {
-                return motionEvent.getAction() == MotionEvent.ACTION_DOWN && returnTapEvent("touch", msg, data, callbackContext);
-              }
-            });
-          }
-          // trigger show every 2500 ms for as long as the requested duration
-          _timer = new CountDownTimer(hideAfterMs, 2500) {
-            public void onTick(long millisUntilFinished) {Shangjin.show();}
-            public void onFinish() {
-              returnTapEvent("hide", msg, data, callbackContext);
-              Shangjin.cancel();
-            }
-          }.start();
-
-          mostRecentShangjin = Shangjin;
-          Shangjin.show();
-
-          PluginResult pr = new PluginResult(PluginResult.Status.OK);
-          pr.setKeepCallback(true);
-          callbackContext.sendPluginResult(pr);
-        }
-      });
-
-      return true;
-    } else {
-      callbackContext.error("Shangjin." + action + " is not a supported function. Did you mean '" + ACTION_SHOW_EVENT + "'?");
+  public static boolean isInstallWeChart(Context context){
+    PackageInfo packageInfo = null;
+    try {
+      packageInfo = context.getPackageManager().getPackageInfo("com.tencent.mm", 0);
+    } catch (Exception e) {
+      packageInfo = null;
       return false;
+//      e.printStackTrace();
+    }
+    if (packageInfo == null) {
+      return false;
+    } else {
+      return true;
     }
   }
+  public static void share9PicsToWXCircle(Context context, String Kdescription, List<String> paths) {
+    if (!isInstallWeChart(context)) {
+      android.widget.Toast.makeText(context, "您没有安装微信", android.widget.Toast.LENGTH_SHORT).show();
+      return;
+    }
+    Intent intent = new Intent();
+    intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.tools.ShareToTimeLineUI"));
+    intent.setAction("android.intent.action.SEND_MULTIPLE");
 
+    ArrayList<Uri> imageList = new ArrayList<Uri>();
+    for (String picPath : paths) {
+      File f = new File(picPath);
+      if (f.exists()) {
+        imageList.add(Uri.fromFile(f));
+      }
+    }
+    if(imageList.size() == 0){
+      android.widget.Toast.makeText(context, "图片不存在", android.widget.Toast.LENGTH_SHORT).show();
+      return;
+    }
+    intent.setType("image/*");
+    intent.putExtra(Intent.EXTRA_STREAM, imageList); //图片数据（支持本地图片的Uri形式）
+    intent.putExtra("Kdescription", Kdescription); //微信分享页面，图片上边的描述
+    context.startActivity(intent);
+  }
+
+  public boolean share(String share_text){
+    Context context= IS_AT_LEAST_LOLLIPOP ? cordova.getActivity().getWindow().getContext() : cordova.getActivity().getApplicationContext();
+
+    if(!isInstallWeChart(context)){
+      android.widget.Toast.makeText(context, "您没有安装微信", android.widget.Toast.LENGTH_SHORT).show();
+      return false;
+    }
+
+    File root = (context).getExternalFilesDir("share");
+
+    files = root.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+              return true;
+            }
+        });
+
+    for(File file :files){
+        paths.add(file.getAbsolutePath());
+    }
+
+    share9PicsToWXCircle(context, share_text, paths);
+
+    return true;
+  }
+  @Override
+  public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    final JSONObject options = args.getJSONObject(0);
+    final String share_text = options.getString("message");
+    share(share_text);
+    if (ACTION_SHARE_EVENT.equals(action)) {
+      share(share_text);
+      callbackContext.success();
+      return true;
+    }
+    return true;
+  }
 
   private void hide() {
-    if (mostRecentShangjin != null) {
-      mostRecentShangjin.cancel();
+    if (mostRecentToast != null) {
+      mostRecentToast.cancel();
       getViewGroup().setOnTouchListener(null);
     }
     if (_timer != null) {
       _timer.cancel();
     }
-  }
-
-  private boolean returnTapEvent(String eventName, String message, JSONObject data, CallbackContext callbackContext) {
-    final JSONObject json = new JSONObject();
-    try {
-      json.put("event", eventName);
-      json.put("message", message);
-      json.put("data", data);
-    } catch (JSONException e) {
-      e.printStackTrace();
-    }
-    callbackContext.success(json);
-    return true;
   }
 
   // lazy init and caching
