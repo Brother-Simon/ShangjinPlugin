@@ -32,7 +32,7 @@ public class Shangjin extends CordovaPlugin {
 
   private static final int BASE_TOP_BOTTOM_OFFSET = 20;
 
-  private android.widget.Shangjin mostRecentShangjin;
+  private android.widget.Toast mostRecentShangjin;
   private ViewGroup viewGroup;
 
   private static final boolean IS_AT_LEAST_LOLLIPOP = Build.VERSION.SDK_INT >= 21;
@@ -86,10 +86,10 @@ public class Shangjin extends CordovaPlugin {
             // assuming a number of ms
             hideAfterMs = Integer.parseInt(duration);
           }
-          final android.widget.Shangjin Shangjin = android.widget.Shangjin.makeText(
+          final android.widget.Toast Shangjin = android.widget.Toast.makeText(
               IS_AT_LEAST_LOLLIPOP ? cordova.getActivity().getWindow().getContext() : cordova.getActivity().getApplicationContext(),
               message,
-              android.widget.Shangjin.LENGTH_LONG // actually controlled by a timer further down
+              android.widget.Toast.LENGTH_LONG // actually controlled by a timer further down
           );
 
           if ("top".equals(position)) {
